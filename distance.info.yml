@@ -1,0 +1,8 @@
+name: 'distance'
+type: module
+description: 'A custom module to calculate distance between two points.'
+core_version_requirement: ^10 || ^9
+package: Custom
+version: '1.0.0'
+dependencies:
+  - drupal:views

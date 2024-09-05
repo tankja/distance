@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function distance_preprocess_views_view(&$variables) {
+  if ($variables['view']->id() == 'custom_distance') {
+    // 배열 초기화
+    $variables['distance_data'] = [];
+
+    \Drupal::logger('distance')->notice('View ID: ' . $variables['view']->id());
+
+    foreach ($variables['view']->result as $row) {
+      // 필드 값 가져오기
+      $address1 = $row->_entity->field_landing_address->value;
+      list($x1, $y1) = explode(', ', $address1);
+
+      $address2 = $row->_entity->field_down_address->value;
+      list($x2, $y2) = explode(', ', $address2);
+
+$x1 = floatval($x1);
+$y1 = floatval($y1);
+$x2 = floatval($x2);
+$y2 = floatval($y2);
+
+// Haversine 공식을 사용하여 거리 계산
+$R = 6371; // 지구 반지름 (킬로미터)
+$dLat = deg2rad($x2 - $x1); // 위도 차이 (라디안)
+$dLon = deg2rad($y2 - $y1); // 경도 차이 (라디안)
+$lat1 = deg2rad($x1); // 위도1 (라디안)
+$lat2 = deg2rad($x2); // 위도2 (라디안)
+
+$a = sin($dLat / 2) * sin($dLat / 2) +
+     sin($dLon / 2) * sin($dLon / 2) * cos($lat1) * cos($lat2);
+$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+$distance = $R * $c; // 거리 계산
+
+      // 거리 데이터 추가
+      $variables['distance_data'][] = [
+        'x1' => $x1,
+        'y1' => $y1,
+        'x2' => $x2,
+        'y2' => $y2,
+        'distance' => $distance,
+      ];
+    }
+  }
+}
